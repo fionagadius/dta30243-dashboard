@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DTA30243 – Housekeeping Operation and Management</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --mint:#5aab7a;--mint-mid:#a8d8b9;--mint-light:#d4f0e0;
+  --pink:#c47a86;--pink-mid:#e8b4bc;--pink-light:#f5d9de;
+  --bg:#f4faf6;--surface:#ffffff;--border:#d6ebe0;
+  --text:#1f2d26;--muted:#5b7a69;--accent:#5aab7a;
+  --radius:12px;
+}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.65}
+
+/* HEADER */
+header{background:linear-gradient(130deg,var(--mint) 0%,var(--pink) 100%);color:#fff;padding:22px 32px;display:flex;align-items:center;gap:18px}
+.h-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+header h1{font-size:19px;font-weight:700;line-height:1.3}
+header p{font-size:12px;opacity:.88;margin-top:3px}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:2px solid var(--border);display:flex;overflow-x:auto;padding:0 20px;gap:2px}
+nav button{padding:11px 15px;background:none;border:none;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s}
+nav button.active{color:var(--mint);border-bottom-color:var(--mint)}
+nav button:hover:not(.active){color:var(--pink)}
+
+/* MAIN */
+main{padding:26px 30px;max-width:1180px;margin:0 auto}
+.tab{display:none}
+.tab.active{display:block}
+
+/* SECTION TITLE */
+.sec-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--mint-light)}
+
+/* CARDS */
+.card-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;text-align:center}
+.card .c-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.card .c-val{font-size:30px;font-weight:700;color:var(--mint);margin:5px 0 2px}
+.card .c-sub{font-size:11px;color:var(--muted)}
+.card.pink .c-val{color:var(--pink)}
+.card.teal{background:var(--mint-light)}
+
+/* CHART GRID */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+@media(max-width:680px){.chart-grid{grid-template-columns:1fr}}
+.chart-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.chart-box h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;font-weight:700}
+
+/* TOPIC HEADER */
+.topic-banner{border-left:5px solid var(--mint);border-radius:var(--radius);background:linear-gradient(90deg,var(--mint-light),var(--pink-light));padding:14px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between}
+.topic-banner h2{font-size:16px;font-weight:700;color:var(--text)}
+.topic-banner p{font-size:12px;color:var(--muted);margin-top:3px}
+.badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700}
+.badge.green{background:var(--mint-light);color:var(--mint)}
+.badge.pink{background:var(--pink-light);color:var(--pink)}
+.badge.orange{background:#fde8cc;color:#b97320}
+.badge.blue{background:#dbeafe;color:#1d5fba}
+.badge.purple{background:#ede9fe;color:#6d28d9}
+.topic-meta{display:flex;gap:10px;flex-wrap:wrap}
+
+/* CHECKLIST */
+.checklist{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px}
+.checklist h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:12px}
+.checklist label{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px}
+.checklist label:last-child{border-bottom:none}
+.checklist input[type=checkbox]{width:16px;height:16px;accent-color:var(--mint)}
+.checklist label.done{text-decoration:line-through;color:var(--muted)}
+.prog-wrap{margin-top:12px}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px}
+.prog-bar{height:9px;background:var(--border);border-radius:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--mint),var(--pink));transition:width .4s}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin-bottom:22px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--mint-light);text-align:left;padding:9px 13px;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mint);font-weight:700}
+td{padding:9px 13px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+
+/* SEARCH */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-bar input,.search-bar select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);color:var(--text);min-width:180px}
+.search-bar input:focus,.search-bar select:focus{outline:2px solid var(--mint);border-color:var(--mint)}
+
+/* CLO CARDS */
+.clo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:24px}
+.clo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.clo-card .clo-num{font-size:11px;font-weight:700;color:var(--mint);text-transform:uppercase;letter-spacing:.06em}
+.clo-card p{font-size:13px;margin:6px 0 8px;color:var(--text)}
+.clo-card .clo-tags{display:flex;gap:6px;flex-wrap:wrap}
+
+/* REFERENCES */
+.ref-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px}
+.ref-list h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;margin-bottom:10px}
+.ref-list li{font-size:12.5px;color:var(--text);margin-bottom:6px;margin-left:18px;line-height:1.5}
+
+/* FOOTER */
+footer{text-align:center;padding:22px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:16px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-icon">🏨</div>
+  <div>
+    <h1>DTA30243 – Housekeeping Operation and Management</h1>
+    <p>Jabatan Pelancongan dan Hospitaliti &nbsp;|&nbsp; Politeknik Kota Kinabalu &nbsp;|&nbsp; Semester 2 · 2025/2026</p>
+  </div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" data-tab="overview">📊 Overview</button>
+  <button data-tab="t1">1 · Introduction</button>
+  <button data-tab="t2">2 · Inventory &amp; Linen</button>
+  <button data-tab="t3">3 · Guestroom</button>
+  <button data-tab="t4">4 · Public Area</button>
+  <button data-tab="t5">5 · Laundry</button>
+  <button data-tab="students">👨‍🎓 Students &amp; Assessment</button>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════ OVERVIEW ═══════════════════════════════════ -->
+<section id="overview" class="tab active">
+  <div class="sec-title">Course Overview</div>
+
+  <div class="card-row">
+    <div class="card teal"><div class="c-label">Students</div><div class="c-val">38</div><div class="c-sub">Enrolled</div></div>
+    <div class="card pink"><div class="c-label">Credit Value</div><div class="c-val">3</div><div class="c-sub">Credit Hours</div></div>
+    <div class="card teal"><div class="c-label">Contact Hours</div><div class="c-val">59</div><div class="c-sub">13h Lect + 46h Prac</div></div>
+    <div class="card pink"><div class="c-label">Assessment</div><div class="c-val">100%</div><div class="c-sub">Continuous – No Exam</div></div>
+    <div class="card teal"><div class="c-label">CLOs</div><div class="c-val">3</div><div class="c-sub">Learning Outcomes</div></div>
+    <div class="card pink"><div class="c-label">Prerequisite</div><div class="c-val">–</div><div class="c-sub">None</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Assessment Weightage</h3><canvas id="cAssess" height="220"></canvas></div>
+    <div class="chart-box"><h3>Contact Hours by Topic</h3><canvas id="cHours" height="220"></canvas></div>
+  </div>
+
+  <div class="sec-title">Course Learning Outcomes (CLO)</div>
+  <div class="clo-grid">
+    <div class="clo-card">
+      <div class="clo-num">CLO 1</div>
+      <p>Apply knowledge related to roles and functions of the housekeeping department in hotel operations.</p>
+      <div class="clo-tags">
+        <span class="badge blue">C3 – Apply</span>
+        <span class="badge green">PLO2 – DHM &amp; DHR</span>
+      </div>
+    </div>
+    <div class="clo-card">
+      <div class="clo-num">CLO 2</div>
+      <p>Perform SOP in handling linen, laundry operation, room and public areas cleaning efficiently.</p>
+      <div class="clo-tags">
+        <span class="badge orange">P4 – Manipulate</span>
+        <span class="badge green">PLO3 – DHM &amp; DHR</span>
+      </div>
+    </div>
+    <div class="clo-card">
+      <div class="clo-num">CLO 3</div>
+      <p>Demonstrate hygiene, safety, and security practices ethically in housekeeping operation.</p>
+      <div class="clo-tags">
+        <span class="badge purple">A3 – Value</span>
+        <span class="badge pink">PLO8 DHM / PLO11 DHR</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-title">Assessment Breakdown</div>
+  <div class="tbl-wrap">
+    <table>
+      <tr><th>Component</th><th>Quantity</th><th>Weightage</th><th>Mode</th></tr>
+      <tr><td>Theory Test</td><td>2×</td><td><span class="badge green">20%</span></td><td>Face-to-face</td></tr>
+      <tr><td>Practical Work</td><td>2×</td><td><span class="badge orange">40%</span></td><td>Face-to-face</td></tr>
+      <tr><td>Practical Test</td><td>1×</td><td><span class="badge blue">20%</span></td><td>Face-to-face</td></tr>
+      <tr><td>Portfolio</td><td>1×</td><td><span class="badge purple">20%</span></td><td>Face-to-face</td></tr>
+      <tr style="font-weight:700"><td>Total</td><td>–</td><td>100%</td><td>Continuous Assessment</td></tr>
+    </table>
+  </div>
+
+  <div class="ref-list">
+    <h3>References</h3>
+    <ul>
+      <li><strong>Main:</strong> Shailendra, S. (2020). <em>Housekeeping Management</em>. Oxford University Press.</li>
+      <li>Andrews, S. (2013). <em>Hotel Housekeeping: A Training Manual</em> (3rd ed.). Tata McGraw-Hill.</li>
+      <li>Raghubalan, G., &amp; Raghubalan, S. (2015). <em>Hotel Housekeeping: Operations and Management</em>. Oxford University Press.</li>
+      <li>American Hotel &amp; Lodging Educational Institute (AHLEI). (2017). <em>Housekeeping Management</em>. AHLEI Press.</li>
+      <li>Abdullah, R. (2018). <em>Pengurusan Tata Graha Hotel</em>. Dewan Bahasa dan Pustaka.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ TOPIC 1 ═══════════════════════════════════ -->
+<section id="t1" class="tab">
+  <div class="topic-banner">
+    <div>
+      <h2>1.0 Introduction to the Housekeeping Department</h2>
+      <p>Defining the department's scope, roles, structure and sustainable practices in hotel operations.</p>
+      <div class="topic-meta" style="margin-top:8px">
+        <span class="badge green">4h Lecture</span>
+        <span class="badge blue">Week 1</span>
+        <span class="badge orange">Theory Test 1</span>
+        <span class="badge purple">CLO1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="checklist" id="cl1">
+    <h3>Sub-Topic Checklist</h3>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.1 Definition of Housekeeping – "Home Away from Home"</label>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.2 Scope and Importance of the Housekeeping Department</label>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.3 Organisational Structure: Executive Housekeeper to Room Attendant</label>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.4 Roles and Responsibilities of Housekeeping Staff</label>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.5 Inter-Departmental Relationships (Front Office, Maintenance, F&amp;B)</label>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.6 Career Path and Professional Development</label>
+    <label><input type="checkbox" onchange="updateProg('cl1')"> 1.7 Sustainable and Green Housekeeping Practices</label>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Progress</span><span id="cl1-pct">0 / 7</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="cl1-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Student Competency – Topic 1</h3><canvas id="ct1" height="230"></canvas></div>
+    <div class="chart-box">
+      <h3>Theory Test 1 – Score Distribution</h3>
+      <canvas id="ct1b" height="230"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ TOPIC 2 ═══════════════════════════════════ -->
+<section id="t2" class="tab">
+  <div class="topic-banner">
+    <div>
+      <h2>2.0 Inventory and Linen Management</h2>
+      <p>Systematic control and handling of linens, cleaning materials, guest supplies, and operational items.</p>
+      <div class="topic-meta" style="margin-top:8px">
+        <span class="badge green">9h Lecture</span>
+        <span class="badge blue">Weeks 2–3</span>
+        <span class="badge orange">Theory Test 2</span>
+        <span class="badge purple">CLO1 &amp; CLO2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="checklist" id="cl2">
+    <h3>Sub-Topic Checklist</h3>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.1 Types of Linen: Bed, Bath, Table and Uniform</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.2 Par Level: Definition, Calculation and Setting</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.3 Linen Control and Inventory Procedures</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.4 Storage and Handling of Cleaning Chemicals &amp; Agents</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.5 Guest Amenities and Supplies Management</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.6 Equipment Inventory: Manual and Mechanical</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.7 Requisition and Issuing Procedures</label>
+    <label><input type="checkbox" onchange="updateProg('cl2')"> 2.8 Care Labelling and Fabric Identification</label>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Progress</span><span id="cl2-pct">0 / 8</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="cl2-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Student Competency – Topic 2</h3><canvas id="ct2" height="230"></canvas></div>
+    <div class="chart-box"><h3>Theory Test 2 – Score Distribution</h3><canvas id="ct2b" height="230"></canvas></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ TOPIC 3 ═══════════════════════════════════ -->
+<section id="t3" class="tab">
+  <div class="topic-banner">
+    <div>
+      <h2>3.0 Guestroom Cleaning</h2>
+      <p>Cleaning, organising, and preparing hotel rooms to hygiene and hotel standards.</p>
+      <div class="topic-meta" style="margin-top:8px">
+        <span class="badge pink">11h Practical</span>
+        <span class="badge blue">Weeks 4–6</span>
+        <span class="badge orange">Practical Test &amp; Portfolio</span>
+        <span class="badge purple">CLO2 &amp; CLO3</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="checklist" id="cl3">
+    <h3>SOP Checklist – Guestroom Cleaning</h3>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.1 Room Status Codes: OCC, VAC, OOO, C/O, C/I</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.2 Pre-Cleaning: Trolley Setup and Supplies Check</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.3 Entry Procedures: Knock, Announce, Enter</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.4 Bed Making: Occupied and Vacant Rooms</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.5 Bathroom Cleaning SOP: Toilet, Basin, Shower/Tub</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.6 Dusting, Vacuuming and Mopping Sequence</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.7 Replenishing Amenities and Guest Supplies</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.8 Turndown Service Procedures</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.9 Room Inspection Checklist and Quality Standards</label>
+    <label><input type="checkbox" onchange="updateProg('cl3')"> 3.10 Handling Guest Requests and Lost &amp; Found</label>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Progress</span><span id="cl3-pct">0 / 10</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="cl3-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Student Competency – Topic 3</h3><canvas id="ct3" height="230"></canvas></div>
+    <div class="chart-box"><h3>Practical Test Scores Distribution</h3><canvas id="ct3b" height="230"></canvas></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ TOPIC 4 ═══════════════════════════════════ -->
+<section id="t4" class="tab">
+  <div class="topic-banner">
+    <div>
+      <h2>4.0 Public Area Cleaning</h2>
+      <p>Maintaining all guest-accessible spaces for cleanliness, safety, and a welcoming environment.</p>
+      <div class="topic-meta" style="margin-top:8px">
+        <span class="badge pink">10h Practical</span>
+        <span class="badge blue">Weeks 6–8</span>
+        <span class="badge orange">Practical Work 1</span>
+        <span class="badge purple">CLO2 &amp; CLO3</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="checklist" id="cl4">
+    <h3>SOP Checklist – Public Area</h3>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.1 Types of Public Areas: Lobby, Corridor, Restroom, Pool, Gym</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.2 Cleaning Schedules: Daily, Weekly, Monthly Routines</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.3 Floor Care: Sweeping, Mopping, Scrubbing, Buffing</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.4 Restroom Cleaning and Sanitation SOP</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.5 Use of Mechanical Equipment: Scrubber, Polisher, Vacuum</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.6 Waste Management and Recycling Practices</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.7 Safety Signage: Wet Floor, Caution</label>
+    <label><input type="checkbox" onchange="updateProg('cl4')"> 4.8 Pest Control Coordination</label>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Progress</span><span id="cl4-pct">0 / 8</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="cl4-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Student Competency – Topic 4</h3><canvas id="ct4" height="230"></canvas></div>
+    <div class="chart-box"><h3>Practical Work 1 – Score Distribution</h3><canvas id="ct4b" height="230"></canvas></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ TOPIC 5 ═══════════════════════════════════ -->
+<section id="t5" class="tab">
+  <div class="topic-banner">
+    <div>
+      <h2>5.0 Laundry Operations</h2>
+      <p>Cleaning, drying, ironing, and storage of hotel fabrics and linens to professional standards.</p>
+      <div class="topic-meta" style="margin-top:8px">
+        <span class="badge pink">25h Practical</span>
+        <span class="badge blue">Weeks 9–14</span>
+        <span class="badge orange">Practical Work 2</span>
+        <span class="badge purple">CLO2 &amp; CLO3</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="checklist" id="cl5">
+    <h3>SOP Checklist – Laundry</h3>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.1 Laundry Department: Layout, Equipment and Workflow</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.2 Sorting: Colour, Fabric Type, Soil Level</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.3 Stain Identification and Pre-Treatment Techniques</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.4 Washing: Machine Operation, Cycles, Temperature</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.5 Drying: Tumble Dryer Operation and Drying Charts</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.6 Ironing and Pressing: Flat-Work Ironer and Finishing</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.7 Folding, Packaging and Quality Inspection</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.8 Storage and Dispatch Procedures</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.9 Guest Laundry and Valet Service SOP</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.10 On-Premise vs Outsourced Laundry Comparison</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.11 Chemical Safety in Laundry: MSDS and PPE</label>
+    <label><input type="checkbox" onchange="updateProg('cl5')"> 5.12 Ergonomics and Occupational Safety in Laundry</label>
+    <div class="prog-wrap">
+      <div class="prog-label"><span>Progress</span><span id="cl5-pct">0 / 12</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="cl5-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Student Competency – Topic 5</h3><canvas id="ct5" height="230"></canvas></div>
+    <div class="chart-box"><h3>Practical Work 2 – Score Distribution</h3><canvas id="ct5b" height="230"></canvas></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ STUDENTS ═══════════════════════════════════ -->
+<section id="students" class="tab">
+  <div class="sec-title">Students &amp; Assessment</div>
+
+  <div class="card-row">
+    <div class="card teal"><div class="c-label">Total</div><div class="c-val">15</div><div class="c-sub">Sample shown</div></div>
+    <div class="card pink"><div class="c-label">Pass</div><div class="c-val" id="st-pass">–</div><div class="c-sub">≥ 50%</div></div>
+    <div class="card teal"><div class="c-label">At-Risk</div><div class="c-val" id="st-risk">–</div><div class="c-sub">&lt; 50%</div></div>
+    <div class="card pink"><div class="c-label">Class Average</div><div class="c-val" id="st-avg">–</div><div class="c-sub">Total %</div></div>
+  </div>
+
+  <div class="search-bar">
+    <input id="searchInput" type="text" placeholder="Search by name…" oninput="filterTable()"/>
+    <select id="statusFilter" onchange="filterTable()">
+      <option value="">All Status</option>
+      <option value="pass">Pass</option>
+      <option value="at-risk">At-Risk</option>
+    </select>
+  </div>
+
+  <div class="tbl-wrap">
+    <table id="studentTable">
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th>
+          <th>Theory Test<br><small>(20%)</small></th>
+          <th>Practical Work<br><small>(40%)</small></th>
+          <th>Practical Test<br><small>(20%)</small></th>
+          <th>Portfolio<br><small>(20%)</small></th>
+          <th>Total</th><th>Grade</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="studentBody"></tbody>
+    </table>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-box"><h3>Grade Distribution – Full Class</h3><canvas id="cGrade" height="260"></canvas></div>
+    <div class="chart-box"><h3>Assessment Component Averages</h3><canvas id="cComp" height="260"></canvas></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  DTA30243 Housekeeping Operation and Management &nbsp;·&nbsp; Jabatan Pelancongan dan Hospitaliti &nbsp;·&nbsp; Politeknik Kota Kinabalu<br>
+  <span style="font-size:10px;opacity:.65">Made with IBM Bob</span>
+</footer>
+
+<script>
+// ─── COLOUR CONSTANTS ───────────────────────────────────────────────
+const MINT  = '#5aab7a', MINTM = '#a8d8b9', MINTL = '#d4f0e0';
+const PINK  = '#c47a86', PINKM = '#e8b4bc', PINKL = '#f5d9de';
+
+// ─── TAB SWITCHING ──────────────────────────────────────────────────
+document.getElementById('mainNav').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const id = btn.dataset.tab;
+  document.getElementById(id).classList.add('active');
+  if (!rendered.has(id)) { rendered.add(id); buildCharts(id); }
+});
+
+const rendered = new Set(['overview']);
+
+// ─── CHECKLIST PROGRESS ──────────────────────────────────────────────
+function updateProg(id) {
+  const wrap = document.getElementById(id);
+  const boxes = wrap.querySelectorAll('input[type=checkbox]');
+  const checked = [...boxes].filter(b => b.checked).length;
+  const total = boxes.length;
+  const pct = Math.round(checked / total * 100);
+  document.getElementById(id + '-pct').textContent = checked + ' / ' + total;
+  document.getElementById(id + '-bar').style.width = pct + '%';
+  boxes.forEach((b, i) => {
+    b.parentElement.classList.toggle('done', b.checked);
+  });
+}
+
+// ─── STUDENT DATA ─────────────────────────────────────────────────────
+const students = [
+  {name:'Amirah Binti Saad',         tt:88, pw:85, pt:84, pf:86},
+  {name:'Mohd Faiz Bin Razali',      tt:70, pw:72, pt:68, pf:74},
+  {name:'Nurul Ain Binti Hassan',    tt:92, pw:90, pt:91, pf:93},
+  {name:'Haziq Bin Mohamad',         tt:52, pw:58, pt:55, pf:60},
+  {name:'Siti Nabilah Binti Awang',  tt:78, pw:80, pt:76, pf:79},
+  {name:'Izzatul Farhanah Bt Zulkifli', tt:85, pw:88, pt:86, pf:87},
+  {name:'Khairul Nizam Bin Idris',   tt:38, pw:42, pt:40, pf:44},
+  {name:'Liyana Binti Rosli',        tt:80, pw:82, pt:79, pf:83},
+  {name:'Muhammad Zulfahmi Bin Tahir',tt:65, pw:68, pt:63, pf:67},
+  {name:'Norshafinaz Binti Mokhtar', tt:74, pw:76, pt:72, pf:75},
+  {name:'Farhana Binti Jamaludin',   tt:94, pw:92, pt:93, pf:95},
+  {name:'Shahril Bin Osman',         tt:48, pw:50, pt:46, pf:52},
+  {name:'Dayang Nabilah Bt Hamdan',  tt:82, pw:84, pt:81, pf:85},
+  {name:'Mohd Aidil Bin Sulaiman',   tt:60, pw:63, pt:58, pf:62},
+  {name:'Rabiatul Adawiyah Bt Jamal',tt:76, pw:78, pt:75, pf:77},
+];
+
+// Weighted total: TT=20%, PW=40%, PT=20%, PF=20%
+function calcTotal(s){ return +(s.tt*0.20 + s.pw*0.40 + s.pt*0.20 + s.pf*0.20).toFixed(1); }
+function getGrade(t){
+  if(t>=90) return 'A+';
+  if(t>=80) return 'A';
+  if(t>=75) return 'A−';
+  if(t>=70) return 'B+';
+  if(t>=65) return 'B';
+  if(t>=60) return 'C+';
+  if(t>=55) return 'C';
+  if(t>=50) return 'D';
+  return 'F';
+}
+function gradeColor(g){
+  if(['A+','A','A−'].includes(g)) return MINT;
+  if(['B+','B'].includes(g))      return '#3b82f6';
+  if(['C+','C'].includes(g))      return '#f59e0b';
+  if(g==='D') return PINK;
+  return '#ef4444';
+}
+function statusBadge(t){ return t>=50 ? '<span class="badge green">Pass</span>' : '<span class="badge pink">At-Risk</span>'; }
+
+function buildStudentTable(data){
+  const tbody = document.getElementById('studentBody');
+  tbody.innerHTML = '';
+  data.forEach((s,i)=>{
+    const tot = calcTotal(s);
+    const g = getGrade(tot);
+    const tr = document.createElement('tr');
+    tr.dataset.name = s.name.toLowerCase();
+    tr.dataset.status = tot>=50 ? 'pass' : 'at-risk';
+    tr.innerHTML = `<td>${i+1}</td><td>${s.name}</td>
+      <td>${s.tt}</td><td>${s.pw}</td><td>${s.pt}</td><td>${s.pf}</td>
+      <td><strong>${tot}</strong></td>
+      <td><strong style="color:${gradeColor(g)}">${g}</strong></td>
+      <td>${statusBadge(tot)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterTable(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const f = document.getElementById('statusFilter').value;
+  document.querySelectorAll('#studentBody tr').forEach(tr=>{
+    const matchName = !q || tr.dataset.name.includes(q);
+    const matchStatus = !f || tr.dataset.status === f;
+    tr.style.display = matchName && matchStatus ? '' : 'none';
+  });
+}
+
+function buildStudentCards(){
+  const totals = students.map(calcTotal);
+  const pass = totals.filter(t=>t>=50).length;
+  const avg = +(totals.reduce((a,b)=>a+b,0)/totals.length).toFixed(1);
+  document.getElementById('st-pass').textContent = pass;
+  document.getElementById('st-risk').textContent = totals.length - pass;
+  document.getElementById('st-avg').textContent = avg + '%';
+}
+
+// ─── CHART.JS OPTIONS HELPERS ─────────────────────────────────────────
+function baseOpts(yMax=100){
+  return {
+    responsive:true,
+    plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+    scales:{
+      y:{beginAtZero:true,max:yMax,ticks:{font:{size:11}}},
+      x:{ticks:{font:{size:11}}}
+    }
+  };
+}
+function pieOpts(){
+  return {responsive:true,plugins:{legend:{position:'right',labels:{font:{size:11}}}}};
+}
+
+// ─── BUILD CHARTS ─────────────────────────────────────────────────────
+const chartReg = {};
+function mk(id, type, data, opts){
+  if(chartReg[id]) chartReg[id].destroy();
+  chartReg[id] = new Chart(document.getElementById(id),{type,data,options:opts});
+}
+
+function buildCharts(tab){
+  if(tab==='overview'){
+    // Assessment doughnut
+    mk('cAssess','doughnut',{
+      labels:['Theory Test (20%)','Practical Work (40%)','Practical Test (20%)','Portfolio (20%)'],
+      datasets:[{data:[20,40,20,20],backgroundColor:[MINT,PINK,MINTM,PINKM],borderWidth:2,borderColor:'#fff'}]
+    }, pieOpts());
+
+    // Contact hours horizontal bar
+    mk('cHours','bar',{
+      labels:['1.0 Introduction','2.0 Inventory & Linen','3.0 Guestroom','4.0 Public Area','5.0 Laundry'],
+      datasets:[{label:'Contact Hours',data:[4,9,11,10,25],
+        backgroundColor:[MINT,MINTM,PINKM,PINK,MINTM],borderRadius:6}]
+    },{
+      indexAxis:'y',responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,max:30,ticks:{font:{size:11}}},y:{ticks:{font:{size:11}}}}
+    });
+  }
+
+  // Per-topic competency data
+  const topicData = {
+    t1:{labels:['Def & Scope','Org Structure','Roles & Resp','Inter-Dept','Career Path','Sustainable'],
+        avg:[78,74,80,72,76,70], top:[95,91,93,89,94,88]},
+    t2:{labels:['Linen Types','Par Level','Linen Control','Chemical Stor','Guest Amenities','Equipment','Requisition','Care Labels'],
+        avg:[76,70,74,68,72,66,71,65], top:[92,88,90,85,89,83,87,82]},
+    t3:{labels:['Room Status','Trolley Setup','Entry SOP','Bed Making','Bathroom','Dusting/Vac','Amenities','Turndown','Inspection','Lost & Found'],
+        avg:[80,75,82,78,76,74,79,72,77,70], top:[96,92,95,91,89,88,93,86,90,85]},
+    t4:{labels:['Area Types','Schedules','Floor Care','Restroom SOP','Mechanical Equip','Waste Mgmt','Safety Signs','Pest Control'],
+        avg:[75,72,70,74,68,76,80,65], top:[91,88,86,89,84,92,95,80]},
+    t5:{labels:['Dept Layout','Sorting','Stain Treat','Washing','Drying','Ironing','Folding','Storage','Guest Laundry','On-Prem vs Out','Chem Safety','Ergonomics'],
+        avg:[78,74,72,76,70,74,80,76,68,65,72,70], top:[94,90,88,92,86,89,95,91,84,80,88,85]},
+  };
+
+  if(topicData[tab]){
+    const d = topicData[tab];
+    mk('c'+tab,  'bar',{
+      labels:d.labels,
+      datasets:[
+        {label:'Class Average',data:d.avg,backgroundColor:MINTM,borderRadius:5},
+        {label:'Top Student', data:d.top,backgroundColor:PINKM,borderRadius:5}
+      ]
+    }, baseOpts(100));
+
+    // Score distribution (bell-ish)
+    const distLabels = ['< 50','50–59','60–69','70–79','80–89','90–100'];
+    const distData = {
+      t1:[1,2,5,13,12,5], t2:[2,3,6,12,10,5],
+      t3:[1,3,7,11,9,7],  t4:[2,4,6,12,8,6],
+      t5:[2,3,8,10,9,6]
+    };
+    mk('c'+tab+'b','bar',{
+      labels:distLabels,
+      datasets:[{label:'No. of Students',data:distData[tab],
+        backgroundColor:[PINK,PINKM,MINTL,MINTM,MINT,MINT],borderRadius:6}]
+    },{
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{stepSize:2,font:{size:11}}},x:{ticks:{font:{size:11}}}}
+    });
+  }
+
+  if(tab==='students'){
+    buildStudentTable(students);
+    buildStudentCards();
+
+    // Grade distribution
+    const grades = students.map(s=>getGrade(calcTotal(s)));
+    const gradeLabels=['A+','A','A−','B+','B','C+','C','D','F'];
+    const gradeCounts = gradeLabels.map(g=>grades.filter(x=>x===g).length);
+    mk('cGrade','bar',{
+      labels:gradeLabels,
+      datasets:[{label:'Students',data:gradeCounts,
+        backgroundColor:[MINT,MINT,MINTM,MINTM,MINTL,PINKL,PINKM,PINK,PINK],borderRadius:6}]
+    },{
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}}},x:{ticks:{font:{size:11}}}}
+    });
+
+    // Component averages
+    const avg = fn => +(students.reduce((a,s)=>a+s[fn],0)/students.length).toFixed(1);
+    mk('cComp','bar',{
+      labels:['Theory Test (20%)','Practical Work (40%)','Practical Test (20%)','Portfolio (20%)'],
+      datasets:[{label:'Class Average (%)',data:[avg('tt'),avg('pw'),avg('pt'),avg('pf')],
+        backgroundColor:[MINT,PINK,MINTM,PINKM],borderRadius:6}]
+    }, baseOpts(100));
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+buildCharts('overview');
+</script>
+</body>
+</html>
